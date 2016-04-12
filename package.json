@@ -1,0 +1,22 @@
+{
+  "name": "hostea",
+  "version": "0.1.0",
+  "description": "Command line tool to quickly add apache vhost",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pyramind10/hostea.git"
+  },
+  "author": "Mike McCall <pyramind10@gmail.com>",
+  "license": "MIT",
+  "bin": {
+    "hostea": "./index.js"
+  },
+  "bugs": {
+    "url": "https://github.com/pyramind10/hostea/issues"
+  },
+  "homepage": "https://github.com/pyramind10/hostea#readme"
+}
