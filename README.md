@@ -2,7 +2,7 @@
 
 Command line tool to quickly configure new apache vhost
 
-The current build is intended to be used to quickly configure apache vhost using scotch-box and vagrant for local development. Yet to be tested elsewhere.
+The current build is intended to quickly configure apache vhost using scotch-box and vagrant for local development. Yet to be tested elsewhere.
 
 
 <code>[sudo] npm install -g hostea</code>
