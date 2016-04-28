@@ -1,16 +1,14 @@
 # hostea
 
-Command line tool to quickly configure new apache vhost
+Command line tool to quickly configure new apache vhost.
 
-The current build is intended to quickly configure apache vhost using scotch-box and vagrant for local development. Yet to be tested elsewhere.
-
+Currently intended for local development.
 
 <code>[sudo] npm install -g hostea</code>
 
-Dealing with apache configuration it's likely need to run it as sudo.
+Dealing with apache configuration, it likely you need to run it as sudo.
 
-Usage:
-
+Usage:<br>
 <code>
 hostea config
 </code>
@@ -29,10 +27,10 @@ Reset config<br>
 hostea config -reset
 </code>
 
-<br><br>
 TODO
 <br>
-- Add nginx
-- Separate vhost templates
+- Add nginx conf
+- vhost templates
 - SSL option
+
 

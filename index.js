@@ -24,17 +24,21 @@ const rl = readline.createInterface({
 nconf.file({file: './config.json'});
 
 var start = function(){
-
-    if(process.argv[2] == "config" && process.argv[3] == '-reset'){
-        config.reset();
-    }else if(process.argv[2] == 'remove') {
-        removeHostFiles();
-    }else if( nconf.get("isSetup") == false || process.argv[2] == "config"){
-        console.log(chalk.green("** HOSTEA CONFIG **"));
-        config.startConfig();
-    }else{
-        askForUrl();
-    }
+    fs.stat('./config.json', function(err, stat) {
+        if (err) {
+            config.startConfig();
+        } else {
+            if (process.argv[2] == "config" && process.argv[3] == '-reset') {
+                config.reset();
+            } else if (process.argv[2] == 'remove') {
+                removeHostFiles();
+            } else if (nconf.get("isSetup") == false || process.argv[2] == "config") {
+                config.startConfig();
+            } else {
+                askForUrl();
+            }
+        }
+    });
 }
 
 

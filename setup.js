@@ -18,12 +18,38 @@ const rl = readline.createInterface({
     terminal: terminal
 });
 
+
 nconf.file({file: './config.json'});
 
-
+var defaultConfig = {
+    "isSetup": false,
+    "defaultService": "apache",
+    "autoRestart": "no",
+    "hostIp": "0.0.0.0",
+    "sitesAvailableDir": "/etc/apache2/sites-available/",
+    "sitesEnabledDir": "/etc/apache2/sites-enabled/",
+    "documentRoot": "/var/www/",
+    "restartCmd": "service apache2 restart"
+}
 
 var startConfigProcess = function(){
-    askSitesAvailableDir(); //TODO finish setup for nginx defaults
+
+    console.log(chalk.green("** HOSTEA CONFIG **"));
+
+    fs.stat('./config.json', function(err, stats){
+        if(err){
+            for(var conf in defaultConfig){
+                nconf.set(conf, defaultConfig[conf]);
+            }
+            nconf.save();
+            askSitesAvailableDir()
+        }else{
+            askSitesAvailableDir(); //TODO finish setup for nginx defaults
+        }
+
+    });
+    
+
     // askDefaultService();
     getIpForHostFile();
 }
@@ -130,19 +156,14 @@ var askAutoRestart = function(){
 }
 
 var resetConfig = function(){
-    fs.readFile('./resetConfig.json', function (err, data) {
-        var data = data;
-        fs.writeFile('./config.json', data, function(err){
-            if(err) throw err;
-            console.log(chalk.yellow('** HOSTEA Config Reset **'));
-            resetVals = JSON.parse(data.toString());
-            for(val in resetVals){
-                console.log(chalk.yellow(val)+':', chalk.green(resetVals[val]));
-            }
-            process.exit(-1);
 
-        });
-    });
+    for(var conf in defaultConfig){
+        nconf.set(conf, defaultConfig[conf]);
+        console.log(chalk.yellow(conf)+':', chalk.blue(defaultConfig[conf]));
+    }
+    nconf.save();
+    console.log(chalk.green('Config Reset!!'));
+    process.exit(-1);
 }
 
 
