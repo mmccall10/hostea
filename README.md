@@ -6,7 +6,7 @@ Currently intended for local development.
 
 <code>[sudo] npm install -g hostea</code>
 
-Dealing with apache configuration, it likely you need to run it as sudo.
+Dealing with apache configuration, it's likely you need to run it as sudo.
 
 Usage:<br>
 <code>
