@@ -21,10 +21,10 @@ const rl = readline.createInterface({
     terminal: terminal
 });
 
-nconf.file({file: './config.json'});
-
+const confFile = path.resolve(__dirname,'config.json');
+nconf.file({file: confFile});
 var start = function(){
-    fs.stat('./config.json', function(err, stat) {
+    fs.stat(confFile, function(err, stat) {
         if (err) {
             config.startConfig();
         } else {
@@ -50,7 +50,7 @@ var removeHostFiles = function(){
             if(err){
                 console.log(chalk.red(err));
             }else{
-                console.log(chalk.green('Removed: '+nconf.get('sitesAvailableDir')+process.argv[3]+'.conf'));
+                console.log(chalk.yellow('Removed: '+nconf.get('sitesAvailableDir')+process.argv[3]+'.conf'));
             }
 
         });
@@ -59,10 +59,32 @@ var removeHostFiles = function(){
             if(err){
                 console.log(chalk.red(err));
             }else{
-                console.log(chalk.green('Removed: '+nconf.get('sitesEnabledDir')+process.argv[3]+'.conf'));
+                console.log(chalk.yellow('Removed: '+nconf.get('sitesEnabledDir')+process.argv[3]+'.conf'));
             }
         });
-        rl.close();
+        if(nconf.get('autoRestart') == "yes"){
+
+            exec(nconf.get('restartCmd'), function(err, stdout, stderr){
+                if (err) {
+
+                    console.error(chalk.red(err));
+                    return;
+
+                }
+
+                if(stderr){
+                    console.log(chalk.yellow(stderr));
+                }
+
+                console.log(chalk.green(stdout));
+
+                rl.close();
+
+            });
+        }else{
+            rl.close();
+        }
+
     }else{
         rl.question(chalk.blue('Site URL to Delete: '), function (answer) {
 
@@ -71,7 +93,7 @@ var removeHostFiles = function(){
                     if(err){
                         console.log(chalk.red(err));
                     }else{
-                        console.log(chalk.green('Removed: '+nconf.get('sitesAvailableDir')+answer+'.conf'));
+                        console.log(chalk.yellow('Removed: '+nconf.get('sitesAvailableDir')+answer+'.conf'));
                     }
 
                 });
@@ -80,7 +102,7 @@ var removeHostFiles = function(){
                     if(err){
                         console.log(chalk.red(err));
                     }else{
-                        console.log(chalk.green('Removed: '+nconf.get('sitesEnabledDir')+answer+'.conf'));
+                        console.log(chalk.yellow('Removed: '+nconf.get('sitesEnabledDir')+answer+'.conf'));
                     }
 
                 });
@@ -89,7 +111,29 @@ var removeHostFiles = function(){
                 console.log(chalk.red('Provide a url to remove: '));
                 removeHostFiles();
             }
-            rl.close();
+
+            if(nconf.get('autoRestart') == "yes"){
+                exec(nconf.get('restartCmd'), function(err, stdout, stderr){
+                    if (err) {
+
+                        console.error(chalk.red(err));
+                        return;
+
+                    }
+
+                    if(stderr){
+                        console.log(chalk.yellow(stderr));
+                    }
+
+                    console.log(chalk.green(stdout));
+
+                    rl.close();
+
+                });
+            }else{
+                rl.close();
+            }
+
 
         });
     }

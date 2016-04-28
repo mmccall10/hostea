@@ -4,6 +4,7 @@ var fs = require('fs'),
     chalk = require('chalk'),
     ip = require('ip'),
     os = require('os'),
+    path = require('path'),
     nconf = require('nconf'),
     hostIp = '0.0.0.0',
     terminal = false
@@ -18,8 +19,8 @@ const rl = readline.createInterface({
     terminal: terminal
 });
 
-
-nconf.file({file: './config.json'});
+const confFile = path.resolve(__dirname,'config.json');
+nconf.file({file: confFile});
 
 var defaultConfig = {
     "isSetup": false,
@@ -36,7 +37,7 @@ var startConfigProcess = function(){
 
     console.log(chalk.green("** HOSTEA CONFIG **"));
 
-    fs.stat('./config.json', function(err, stats){
+    fs.stat(confFile, function(err, stats){
         if(err){
             for(var conf in defaultConfig){
                 nconf.set(conf, defaultConfig[conf]);
@@ -183,7 +184,6 @@ var getIpForHostFile = function(){
             if(ifname == 'eth1'){
                 hostIp = iface.address;
             }
-
             ++alias;
         });
 
