@@ -25,7 +25,7 @@ nconf.file({file: confFile});
 var defaultConfig = {
     "isSetup": false,
     "defaultService": "apache",
-    "autoRestart": "no",
+    "autoRestart": "yes",
     "hostIp": "0.0.0.0",
     "sitesAvailableDir": "/etc/apache2/sites-available/",
     "sitesEnabledDir": "/etc/apache2/sites-enabled/",
