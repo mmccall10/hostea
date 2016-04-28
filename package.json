@@ -1,6 +1,6 @@
 {
   "name": "hostea",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Command line tool to quickly add apache vhost",
   "main": "index.js",
   "scripts": {
@@ -21,6 +21,7 @@
   "homepage": "https://github.com/pyramind10/hostea#readme",
   "dependencies": {
     "chalk": "^1.1.3",
-    "ip": "^1.1.2"
+    "ip": "^1.1.2",
+    "nconf": "^0.8.4"
   }
 }

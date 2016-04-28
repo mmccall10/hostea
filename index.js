@@ -1,165 +1,215 @@
 #!/usr/local/bin/node
-var fs = require('fs');
-var path = require('path');
-var readline = require('readline');
-var exec = require('child_process').exec;
-var chalk = require('chalk');
-var ip = require('ip');
+var fs = require('fs'),
+    path = require('path'),
+    readline = require('readline'),
+    exec = require('child_process').exec,
+    chalk = require('chalk'),
+    ip = require('ip'),
+    os = require('os'),
+    nconf = require('nconf'),
+    config = require('./setup.js'),
+    terminal = false,
+    siteUrl = '';
 
-var os = require('os');
-
-
+if(!process.stdout.isTTY){
+    terminal = true
+}
 
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
-    terminal: false
+    terminal: terminal
 });
 
-//TODO - save config
+nconf.file({file: './config.json'});
 
-var config = {
-    sitesAvailableDir: '/etc/apache2/sites-available/',
-    sitesEnabledDir: '/etc/apache2/sites-enabled/',
-    documentRoot: '/var/www/',
-    siteUrl: '',
-    ip: ''
+var start = function(){
+
+    if(process.argv[2] == "config" && process.argv[3] == '-reset'){
+        config.reset();
+    }else if(process.argv[2] == 'remove') {
+        removeHostFiles();
+    }else if( nconf.get("isSetup") == false || process.argv[2] == "config"){
+        console.log(chalk.green("** HOSTEA CONFIG **"));
+        config.startConfig();
+    }else{
+        askForUrl();
+    }
 }
 
+
+var removeHostFiles = function(){
+    //TODO save created host files in a host.json config file for printable locations
+
+    if(typeof process.argv[3] !== 'undefined'){
+        fs.unlink(nconf.get('sitesAvailableDir')+process.argv[3]+'.conf', function(err){
+            if(err){
+                console.log(chalk.red(err));
+            }else{
+                console.log(chalk.green('Removed: '+nconf.get('sitesAvailableDir')+process.argv[3]+'.conf'));
+            }
+
+        });
+
+        fs.unlink(nconf.get('sitesEnabledDir')+process.argv[3]+'.conf', function(err){
+            if(err){
+                console.log(chalk.red(err));
+            }else{
+                console.log(chalk.green('Removed: '+nconf.get('sitesEnabledDir')+process.argv[3]+'.conf'));
+            }
+        });
+        rl.close();
+    }else{
+        rl.question(chalk.blue('Site URL to Delete: '), function (answer) {
+
+            if(answer.length > 0) {
+                fs.unlink(nconf.get('sitesAvailableDir')+answer+'.conf', function(err){
+                    if(err){
+                        console.log(chalk.red(err));
+                    }else{
+                        console.log(chalk.green('Removed: '+nconf.get('sitesAvailableDir')+answer+'.conf'));
+                    }
+
+                });
+
+                fs.unlink(nconf.get('sitesEnabledDir')+answer+'.conf', function(err){
+                    if(err){
+                        console.log(chalk.red(err));
+                    }else{
+                        console.log(chalk.green('Removed: '+nconf.get('sitesEnabledDir')+answer+'.conf'));
+                    }
+
+                });
+
+            }else{
+                console.log(chalk.red('Provide a url to remove: '));
+                removeHostFiles();
+            }
+            rl.close();
+
+        });
+    }
+
+}
 
 var askForUrl = function(){
 
-    rl.question(chalk.blue('Site URL: '), function (answer) {
+    if(typeof process.argv[2] !== 'undefined') {
+        siteUrl = process.argv[2];
+        makeHostFile();
+    }else{
+        rl.question(chalk.blue('Site URL: '), function (answer) {
 
-        if(answer.length > 0) {
+            if(answer.length > 0) {
 
-            config.siteUrl = answer;
+                siteUrl = answer;
 
-        }else if(answer.length == 0){
+            }else if(answer.length == 0){
 
-            console.log(chalk.red("Must enter a site url."));
-            askForUrl();
-            return;
-
-        }
-        askForWebRoot();
-
-    });
-}
-
-var askForWebRoot = function(){
-
-    rl.question(chalk.blue('Web Root (/var/www/): '), function (answer) {
-
-        if(answer.length > 0) {
-            config.documentRoot = answer;
-        }
-
-        makeApacheConfigFile();
-
-    });
-}
-
-
-
-var getIpForHostFile = function(){
-    var ifaces = os.networkInterfaces();
-
-    Object.keys(ifaces).forEach(function (ifname) {
-        var alias = 0;
-
-        ifaces[ifname].forEach(function (iface) {
-            if ('IPv4' !== iface.family || iface.internal !== false) {
-                // skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
+                console.log(chalk.red("Must enter a site url."));
+                askForUrl();
                 return;
-            }
-            if(ifname == 'eth1'){
-                config.ip = iface.address;
-            }
 
-            ++alias;
+            }
+            makeHostFile();
+
         });
-
-
-    });
+    }
 }
+
 
 var finish = function(){
     console.log(chalk.bgGreen('Don\'t forget to set up your local host file!'));
 
-    if(config.ip.length > 0){
-        console.log(chalk.bgWhite('sudo echo "'+config.ip+' '+config.siteUrl+'" >> /etc/hosts'));
+    if(nconf.get('hostIp').length > 0){
+        console.log(chalk.bgWhite('sudo echo "'+nconf.get('hostIp')+' '+siteUrl+'" >> /etc/hosts'));
 
     }
 
     console.log(chalk.green('Happy Coding'));
 
-
     process.exit(-1);
 }
 
-//setup config
 
-var makeApacheConfigFile = function(){
-
+var makeHostFile = function(){
+    //TODO create dynamic vhost templates for nginx and apache (:443, :80)
 
     var vHostFile = ''+
         '<VirtualHost *:80>'+
         '\n   ServerAdmin webmaster@localhost'+
-        '\n   ServerName '+config.siteUrl+
-        '\n   ServerAlias '+config.siteUrl+
-        '\n   DocumentRoot /'+config.documentRoot+config.siteUrl+
+        '\n   ServerName '+siteUrl+
+        '\n   ServerAlias '+siteUrl+
+        '\n   DocumentRoot /'+nconf.get('documentRoot')+siteUrl+
         '\n   ErrorLog ${APACHE_LOG_DIR}/error.log'+
-        '\n   CustomLog ${APACHE_LOG_DIR}/access.log combined'+
+        '\n   CustomLog ${APACHE_LOG_DIR}/'+siteUrl+'.access.log combined'+
         '\n</VirtualHost>';
 
 
-    fs.writeFileSync(config.sitesAvailableDir+config.siteUrl+'.conf', vHostFile);
+    fs.writeFileSync(nconf.get('sitesAvailableDir')+siteUrl+'.conf', vHostFile);
 
-    fs.symlink(config.sitesAvailableDir+config.siteUrl+'.conf', config.sitesEnabledDir+config.siteUrl+'.conf', function() {
+    fs.symlink(nconf.get('sitesAvailableDir')+siteUrl+'.conf', nconf.get('sitesEnabledDir')+siteUrl+'.conf', function() {
 
-        //TODO - provide host file config
         console.log(chalk.green('Site configuration has been created! '));
 
-        rl.question(chalk.blue('Do you want to restart apache now (service apache2 restart)? [y,n] '), function (answer) {
+        if(nconf.get('autoRestart') == 'no'){
 
-            if(answer =='y' || answer == 'Y' || answer == 'Yes' || answer == 'yes'){
+            rl.question(chalk.blue('Do you want to restart apache now (service apache2 restart)? [y,N] '), function (answer) {
 
-                exec('service apache2 restart', function(err, stdout, stderr){
-                    if (err) {
+                if(answer != 'y' || answer == 'Y' || answer == 'Yes' || answer == 'yes'){
 
-                        console.error(chalk.red(err));
-                        return;
+                    exec('service apache2 restart', function(err, stdout, stderr){
+                        if (err) {
 
-                    }
+                            console.error(chalk.red(err));
+                            return;
 
-                    if(stderr){
-                        console.log(chalk.yellow(stderr));
-                    }
+                        }
 
-                    console.log(chalk.green(stdout));
+                        if(stderr){
+                            console.log(chalk.yellow(stderr));
+                        }
 
+                        console.log(chalk.green(stdout));
+
+                        rl.close();
+                        finish();
+
+                    });
+
+                }else{
                     rl.close();
                     finish();
+                }
 
-                });
+            });
+        }else{
+            exec(nconf.get('restartCmd'), function(err, stdout, stderr){
+                if (err) {
 
-            }else{
+                    console.error(chalk.red(err));
+                    return;
+
+                }
+
+                if(stderr){
+                    console.log(chalk.yellow(stderr));
+                }
+
+                console.log(chalk.green(stdout));
+
                 rl.close();
                 finish();
 
-            }
+            });
+        }
 
-
-        });
 
     });
 
-
 }
 
-askForUrl();
-getIpForHostFile();
+start();
 
 
 

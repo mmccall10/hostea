@@ -1,0 +1,10 @@
+{
+  "isSetup": false,
+  "defaultService": "apache",
+  "autoRestart": "no",
+  "hostIp": "0.0.0.0",
+  "sitesAvailableDir": "/etc/apache2/sites-available/",
+  "sitesEnabledDir": "/etc/apache2/sites-enabled/",
+  "documentRoot": "/var/www/",
+  "restartCmd": "service apache2 restart"
+}
