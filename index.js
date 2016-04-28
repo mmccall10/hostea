@@ -167,10 +167,10 @@ var askForUrl = function(){
 
 
 var finish = function(){
-    console.log(chalk.bgGreen('Don\'t forget to set up your local host file!'));
+    console.log(chalk.inverse('Don\'t forget to set up your local host file!'));
 
     if(nconf.get('hostIp').length > 0){
-        console.log(chalk.bgWhite('sudo echo "'+nconf.get('hostIp')+' '+siteUrl+'" >> /etc/hosts'));
+        console.log(chalk.inverse('Try:','sudo echo "'+nconf.get('hostIp')+' '+siteUrl+'" >> /etc/hosts'));
 
     }
 
@@ -202,9 +202,9 @@ var makeHostFile = function(){
 
         if(nconf.get('autoRestart') == 'no'){
 
-            rl.question(chalk.blue('Do you want to restart apache now (service apache2 restart)? [y,N] '), function (answer) {
+            rl.question(chalk.blue('Restart (service apache2 restart) [y,N] '), function (answer) {
 
-                if(answer != 'y' || answer == 'Y' || answer == 'Yes' || answer == 'yes'){
+                if(answer == 'y' || answer == 'Y' || answer == 'Yes' || answer == 'yes'){
 
                     exec('service apache2 restart', function(err, stdout, stderr){
                         if (err) {
@@ -226,6 +226,7 @@ var makeHostFile = function(){
                     });
 
                 }else{
+                    console.log(chalk.yellow('Make sure to run your service restart command.'));
                     rl.close();
                     finish();
                 }
