@@ -188,7 +188,7 @@ var makeHostFile = function(){
         '\n   ServerAdmin webmaster@localhost'+
         '\n   ServerName '+siteUrl+
         '\n   ServerAlias '+siteUrl+
-        '\n   DocumentRoot /'+nconf.get('documentRoot')+siteUrl+
+        '\n   DocumentRoot '+nconf.get('documentRoot')+siteUrl+
         '\n   ErrorLog ${APACHE_LOG_DIR}/error.log'+
         '\n   CustomLog ${APACHE_LOG_DIR}/'+siteUrl+'.access.log combined'+
         '\n</VirtualHost>';
