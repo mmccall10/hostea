@@ -22,8 +22,6 @@
   "dependencies": {
     "chalk": "^1.1.3",
     "ip": "^1.1.2",
-    "nconf": "^0.8.4",
-    "hosteaConf": "file:./config.json",
-    "hosteaConfReset": "file:./resetConfig.json"
+    "nconf": "^0.8.4"
   }
 }
